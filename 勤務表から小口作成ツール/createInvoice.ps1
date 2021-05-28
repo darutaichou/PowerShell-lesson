@@ -10,11 +10,19 @@
 
 # 引数が足りない場合、処理を中断する
 if ([string]::IsNullorEmpty($Args[0])) {
-    Write-Host "`r`n====== 引数1個目に勤務表ファイルを指定してください ======`r`n"
+    Write-Host "`r`n====== 引数1個目に小口交通費請求書ファイルを指定してください ======`r`n"
     exit
-} elseif ([string]::IsNullorEmpty($Args[1])) {
-    Write-Host "`r`n====== 引数に2個目小口交通費請求書ファイルを指定してください ======`r`n"
-    exit
+}
+
+# 現在日時を取得する
+$tomonth = (Get-Date).Month
+$today = (Get-Date).Day
+
+# 現在日時から作成するべき勤務表の月次を判定
+if ($today -le 24) {
+    $kinmuhyouMonth = $tomonth
+} else {
+    $kinmuhyouMonth = $tomonth + 1
 }
 
 # 勤務表ファイルのファイル名から月次を取り出す
