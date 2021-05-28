@@ -1,16 +1,23 @@
 #
 # 勤務表から小口交通費請求書を作成するPowershell
 # 
+# 前提条件 : 当該powershellと同じフォルダに空の「<社員番号>_小口交通費・出張旅費精算明細書_<年月日>.xlsx」が1つ存在すること
+#
 # 実行形式 : .\createInvoice.ps1 勤務表Excelファイル
 #
 # 勤務表の形式 : <社員番号>_勤務表_m月_<氏名>.xlsx
 #
 
-# 引数がない場合、処理を中断する
+# 引数が足りない場合、処理を中断する
 if ([string]::IsNullorEmpty($Args[0])) {
     Write-Host "`r`n====== 引数に勤務表ファイルを指定してください =====`r`n"
     exit
+    if ([string]::IsNullorEmpty($Args[1])) {
+        Write-Host "`r`n====== 引数に小口交通費請求書ファイルを指定してください =====`r`n"
+    }
 }
+
+# 
 
 # 勤務表ファイルのファイル名から月を取り出す
 $Args[0] -match "_勤務表_(?<month>.*?)月" | Out-Null
@@ -47,3 +54,5 @@ try {
 } catch {
     $excel = New-Object -ComObject "Excel.Application" 
 }
+
+# 勤務表ブックを開く
