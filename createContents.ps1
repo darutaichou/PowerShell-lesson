@@ -1,29 +1,33 @@
 #
-# ãƒ‘ãƒ©ã‚·ã‹ã‚‰ç›®æ¬¡ã‚’ä½œæˆã™ã‚‹PowerShellä½œæˆ
+# ƒpƒ‰ƒV‚Ì–ÚŸ‚ğì¬‚·‚éPowershell
 #
 
-# ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‹ã‚‰ãƒ‘ãƒ©ã‚·ã®ã¿ã‚’å—ã‘å–ã‚‹
-$parameterSheets = $input |? Name -Match 'ãƒ‘ãƒ©ã‚·ã‚‚ã©ã'
+# ƒpƒCƒvƒ‰ƒCƒ“‚©‚çƒpƒ‰ƒV‚¾‚¯‚ğó‚¯æ‚é
+$parameterSheets = $input |? Name -Match 'ƒpƒ‰ƒV‚à‚Ç‚«'
 
-# Excelã®èµ·å‹•
+# Excel‚ğ‹N“®
 try {
-    # èµ·å‹•ä¸­ã§ã‚ã‚Œã°èµ·å‹•ä¸­ã®ãƒ—ãƒ­ã‚»ã‚¹ã‚’å–å¾—
+    # ‹N“®’†‚ÌExcelƒvƒƒZƒX‚ğæ“¾
     $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject("Excel.Application")
 } catch {
     $excel = New-Object -ComObject "Excel.Application" 
 }
 
 $parameterSheets |% {
-    # ãƒ–ãƒƒã‚¯ã‚’é–‹ã
-    $book = $excel.workbooks.open($_)
+    # ƒpƒ‰ƒV‚Ìƒtƒ‹ƒpƒX‚ğæ“¾
+    $fullPath = $_.fullName
 
-    # ç›®æ¬¡ã‚·ãƒ¼ãƒˆã®ä½œæˆ
+    # ƒuƒbƒN‚ğŠJ‚­
+    $book = $excel.workbooks.open($fullPath)
+
+    # –ÚŸƒV[ƒg‚ğì¬
     
-    # ç›®æ¬¡ã‚·ãƒ¼ãƒˆã®ç¸¦åˆ—ã®ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼
+    # –ÚŸƒV[ƒg‚Ìc—ñƒJƒEƒ“ƒ^[
     $countContentsRow = 2
 
     for ($i = 4; $i -le $book.worksheets.count; $i++) {
-        # å¤§è¦‹å‡ºã—ã‚’ç›®æ¬¡ã¸ã‚³ãƒ”ãƒ¼
-        $parameterSheet.sheet(3).cells.item(2, 2) = $parameterSheet.sheet(i).cells.item 
+        # ‘åŒ©o‚µ‚ğ–ÚŸ‚ÉƒRƒs[
+        $parameterSheet.sheet(3).cells.item(2, 2) = $parameterSheet.sheet($i).cells.item
+        $countContentsRow++ 
     }
 }
