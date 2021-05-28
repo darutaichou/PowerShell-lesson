@@ -20,12 +20,12 @@ $month = $Matches.month
 if ( $month -match "[1-9]|1[12]") {
     start-sleep -milliSeconds 300
 
+    try {
     # 勤務表ファイルのフルパス取得
-    $kinmuhyouFullPath = Resolve-Path $Args[0]
-
-    # 勤務表が存在しているかチェック
-    if (! (Test-Path "$kinmuhyouFullPath")) {
-        Write-Host "勤務表ファイルが存在しません。`r`n処理を中断します"
+    $kinmuhyouFullPath = Resolve-Path $Args[0] -ErrorAction Stop
+    } catch [Exception] {
+        # 勤務表が存在しているかチェック
+        Write-Host "勤務表ファイルが存在しません。`r`n処理を中断します`r`n"
         exit
     }
 
@@ -37,7 +37,13 @@ if ( $month -match "[1-9]|1[12]") {
 else {
     # 勤務表ファイルのフォーマットが違う場合は修正させる
     start-sleep -milliSeconds 300
-    Write-Host " <社員番号>_勤務表_m月_<氏名>.xlsx の形式にファイル名を修正してください"
+    Write-Host " ######### <社員番号>_勤務表_m月_<氏名>.xlsx の形式にファイル名を修正してください #########`r`n"
 }
 
-
+# Excelを起動する
+try {
+    # 起動中のExcelプロセスを取得
+    $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject("Excel.Application")
+} catch {
+    $excel = New-Object -ComObject "Excel.Application" 
+}
