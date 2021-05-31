@@ -149,7 +149,63 @@ for ($row = 14; $row -le 44; $row++) {
         $koguchiSheet.cells.item($rowCounter,4) = $kinmuhyouSheet.cells.item($row,3).text
         $rowCounter = $rowCounter + 3
 
-        # 
+        # ------------- 変数定義 ---------------
+        # 適用セル(横)
+        $tekiyou = 6
+        # 区間セル(横)
+        $kukan = 18
+        # 交通機関セル(横)
+        $koutsukikan = 26
+        # 金額(横)
+        $kingaku = 30
+
+        # 田町 の場合
+        if ($workPlace -match "^田町$") {
+            # 2. 適用の記入
+            $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→田町'
+            # 3. 区間の記入
+            $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→田町'
+            # 4. 交通機関の記入
+            $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線"
+            # 5. 金額の記入
+            $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=376*2'
+        }
+        # お台場 の場合
+        if ($workPlace -match "^お台場$") {
+            # 2. 適用の記入
+            $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→お台場'
+            # 3. 区間の記入
+            $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→東京テレポート'
+            # 4. 交通機関の記入
+            $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR埼京線`r`nりんかい線"
+            # 5. 金額の記入
+            $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=681*2'
+        }
+        # 品川 の場合
+        if ($workPlace -match "^品川$") {
+            # 2. 適用の記入
+            $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→品川'
+            # 3. 区間の記入
+            $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→品川'
+            # 4. 交通機関の記入
+            $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線"
+            # 5. 金額の記入
+            $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=376*2'
+        }
+
+        # 2. 適用の記入
+
+
+        # 3. 区間の記入
+
+
+        # 4. 交通機関の記入
+
+
+        # 5. 金額の記入
+
+
+
     }
 }
 
