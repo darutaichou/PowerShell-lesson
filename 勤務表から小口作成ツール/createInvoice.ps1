@@ -8,7 +8,22 @@
 # 勤務表の形式 : <社員番号>_勤務表_m月_<氏名>.xlsx
 #
 
-# 注意書きを表示。問題ない場合にはEnterを押させる。
+# ----------------- 関数定義 ---------------------
+
+# 勤務表と小口を保存せずに閉じて、Excelを中断する関数
+function endExcel {
+    # Excelの終了
+    $excel.quit()
+    # 使用していたプロセスの解放
+    $excel = $null
+    $kinmuhyouBook = $null
+    $kinmuhyouSheet = $null
+    $koguchiBook = $null
+    $koguchiSheet = $null
+    $koguchiCell = $null
+}
+
+########### 注意書きを表示。問題ない場合にはEnterを押させる。
 
 # 引数が足りない場合、処理を中断する
 if ([string]::IsNullorEmpty($Args[0])) {
@@ -90,7 +105,9 @@ $kinmuhyouSheet = $kinmuhyouBook.sheets( "$month"+'月')
 $koguchiBook = $excel.workbooks.open($koguchiFullPath)
 $koguchiSheet = $koguchiBook.sheets(1)
 
-# 勤務表の中身を小口にコピーする
+# ------------- 勤務表の中身を小口にコピーする ----------------
+
+# ------------- 個人情報欄のコピー --------------
 
 # 現在の年を取得
 $thisYear = (Get-Date).Year
@@ -107,7 +124,13 @@ $koguchiSheet.cells.item(60,8) = $month
 $koguchiSheet.cells.item(60,11) = (Get-Date "$thisYear/$month/1" -Day 1).AddMonths(1).AddDays(-1).Day
 
 # 名前のコピー
-$koguchiSheet.cells.item(64,21) = $kinmuhyouBook.sheets($month+"月").cells.range("W7").text
+$koguchiSheet.cells.item(64,21) = $kinmuhyouSheet.cells.range("W7").text
+
+# 所属のコピー
+$affiliation = $kinmuhyouSheet.cells.range("W6").text
+# "部" を削除する
+$affiliation -match "(?<affliationName>.+?)部" | Out-Null
+$koguchiSheet.cells.item(62,6) = $Matches.affliationName
 
 # 印鑑のコピー
 # 勤務表の印鑑のあるセルをクリップボードにコピー
