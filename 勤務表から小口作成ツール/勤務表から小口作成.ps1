@@ -63,15 +63,19 @@ if ($today -le 24) {
 }
 
 # 小口テンプレを取得
-$koguchi = Get-ChildItem -Recurse -File |? Name -Match "小口交通費・出張旅費精算明細書_テンプレ.xlsx"
+$koguchiTemplate = Get-ChildItem -Recurse -File |? Name -Match "小口交通費・出張旅費精算明細書_テンプレ.xlsx"
 # 該当小口ファイルの個数確認
-if ($koguchi.Count -lt 1) {
+if ($koguchiTemplate.Count -lt 1) {
     Write-Host "`r`n該当する小口ファイルが存在しません`r`n`r`nダウンロードし直してください`r`n" -ForegroundColor Red
     exit
-} elseif ($koguchi.Count -gt 1) {
+} elseif ($koguchiTemplate.Count -gt 1) {
     Write-Host "`r`n該当する小口ファイルが多すぎます`r`n`r`nダウンロードし直してください`r`n" -ForegroundColor Red
     exit
 }
+
+# テンプレートから小口交通費請求書を作成する
+$koguchi = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath "小口交通費・出張旅費精算明細書_コピー先.xlsx"
+Copy-Item -path $koguchiTemplate.FullName -Destination $koguchi
 
 # 勤務表ファイルを取得
 $kinmuhyou = Get-ChildItem -Recurse -File |? Name -Match "[0-9]{3}_勤務表_($month)月_.+"
@@ -95,15 +99,6 @@ if ( $kinmuhyou.Name  -match "[0-9]{3}_勤務表_([1-9]|1[12])月_.+\.xlsx" ) {
     } catch [Exception] {
         # 勤務表が存在しているかチェック
         Write-Host ($month + "月の勤務表ファイルが存在しません。`r`nダウンロードしてください`r`n") -ForegroundColor Red
-        exit
-    }
-
-    try {
-    # 小口ファイルのフルパス取得
-    $koguchiFullPath = $koguchi.FullName
-    } catch [Exception] {
-        # 小口ファイルが存在しているかチェック
-        Write-Host "小口テンプレが存在しません。`r`nダウンロードし直してください`r`n" -ForegroundColor Red
         exit
     }
 
@@ -131,7 +126,7 @@ $kinmuhyouBook = $excel.workbooks.open($kinmuhyouFullPath)
 $kinmuhyouSheet = $kinmuhyouBook.sheets( "$month"+'月')
 
 # 小口ブックを開く
-$koguchiBook = $excel.workbooks.open($koguchiFullPath)
+$koguchiBook = $excel.workbooks.open($koguchi)
 $koguchiSheet = $koguchiBook.sheets(1)
 
 
@@ -152,7 +147,9 @@ for ($row = 14; $row -le 44; $row++) {
         # 1. 月日の記入
         $koguchiSheet.cells.item($rowCounter,2) = $month
         $koguchiSheet.cells.item($rowCounter,4) = $kinmuhyouSheet.cells.item($row,3).text
-        $rowCounter = $rowCounter + 3    
+        $rowCounter = $rowCounter + 3
+
+        # 
     }
 }
 
