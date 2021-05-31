@@ -25,7 +25,9 @@ function endExcel {
     exit
 }
 
-########### 注意書きを表示。問題ない場合にはEnterを押させる。
+###########
+########################## 注意書きを表示。問題ない場合にはEnterを押させる。
+#=========================================================================
 
 # 引数が足りない場合、処理を中断する
 if ([string]::IsNullorEmpty($Args[0])) {
@@ -126,7 +128,7 @@ $koguchiSheet.cells.item(60,4) = $thisYear
 $koguchiSheet.cells.item(60,8) = $month
 
 # 月の最終日を日付欄に設定
-$koguchiSheet.cells.item(60,11) = (Get-Date "$thisYear/$month/1" -Day 1).AddMonths(1).AddDays(-1).Day
+$koguchiSheet.cells.item(60,11) = (Get-Date "$thisYear/$month/1").AddMonths(1).AddDays(-1).Day
 
 # 2. 名前のコピー
 $koguchiSheet.cells.item(64,21) = $kinmuhyouSheet.cells.range("W7").text
@@ -160,7 +162,9 @@ $koguchiSheet.range("AD64").formula = ""
 $koguchiSheet.range("AD64").interior.colorindex = 0
 # 罫線を編集するための宣言
 $LineStyle = "microsoft.office.interop.excel.xlLineStyle" -as [type]
+# 罫線をなしにする
 $koguchiSheet.range("AD64").borders.linestyle = $linestyle::xllinestylenone
+# 印鑑（オブジェクト）が増えてなさそうなら、メッセージを表示する
 if ($koguchiSheet.shapes.count -eq 68) {
     $haveNotStamp = $true
 }
@@ -172,6 +176,6 @@ if ($koguchiSheet.shapes.count -eq 68) {
 # 印鑑がないかもしれない場合注意喚起
 if ($haveNotStamp) {
     Write-Host "`r`n#################################################################################" -ForegroundColor Blue
-    Write-Host "　　印鑑が勤務表, 小口交通費・出張旅費精算明細書に入っていない可能性があります`r`n　　確認してください" -ForegroundColor Blue
+    Write-Host "　　印鑑が勤務表に入っていない、または既定のセルからずれている可能性があります`r`n　　確認してください"  -ForegroundColor Blue
     Write-Host "#################################################################################`r`n" -ForegroundColor Blue
 }
