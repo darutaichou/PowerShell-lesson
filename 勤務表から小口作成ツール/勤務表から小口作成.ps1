@@ -21,6 +21,8 @@ function endExcel {
     $koguchiBook = $null
     $koguchiSheet = $null
     $koguchiCell = $null
+    # ガベージコレクト
+    [GC]::Collect()
     # 処理を終了する
     exit
 }
@@ -147,7 +149,6 @@ for ($row = 14; $row -le 44; $row++) {
         # 1. 月日の記入
         $koguchiSheet.cells.item($rowCounter,2) = $month
         $koguchiSheet.cells.item($rowCounter,4) = $kinmuhyouSheet.cells.item($row,3).text
-        $rowCounter = $rowCounter + 3
 
         # ------------- 変数定義 ---------------
         # 適用セル(横)
@@ -159,54 +160,75 @@ for ($row = 14; $row -le 44; $row++) {
         # 金額(横)
         $kingaku = 30
 
+
         switch -regex ($workPlace) {
             "^田町$" {
                  # 2. 適用の記入
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→田町'
+                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "自宅←→田町"
                 # 3. 区間の記入
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→田町'
+                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川←→田町"
                 # 4. 交通機関の記入
                 $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線"
                 # 5. 金額の記入
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=376*2'
+                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376*2"
             }
             "^お台場$"{
                 # 2. 適用の記入
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→お台場'
+                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "自宅←→お台場"
                 # 3. 区間の記入
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→東京テレポート'
+                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川←→東京テレポート"
                 # 4. 交通機関の記入
                 $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR埼京線`r`nりんかい線"
                 # 5. 金額の記入
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=681*2'
+                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681*2"
+                # 6. 3行以上の欄がある場合は行の高さを変更する
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
             }
             "^品川$"{
                 # 2. 適用の記入
-            $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '自宅←→品川'
-            # 3. 区間の記入
-            $koguchiSheet.cells.item($rowCounter,$kukan).formula = '仙川←→品川'
-            # 4. 交通機関の記入
-            $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線"
-            # 5. 金額の記入
-            $koguchiSheet.cells.item($rowCounter,$kingaku).formula = '=376*2'
+                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "自宅←→品川"
+                # 3. 区間の記入
+                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川←→品川"
+                # 4. 交通機関の記入
+                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線"
+                # 5. 金額の記入
+                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376*2"
             }
-            Default {}
+            "^品川/お台場$"{
+                # 2. 適用の記入
+                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "自宅→品川→お台場→自宅"
+                # 3. 区間の記入
+                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川→品川`r`n→東京テレポート→仙川"
+                # 4. 交通機関の記入
+                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nレインボーバス"
+                # 5. 金額の記入
+                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376+220+681"
+                # 6. 3行以上の欄がある場合は行の高さを変更する
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
+            }
+            "^お台場/品川$"{
+                # 2. 適用の記入
+                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "自宅→お台場→品川→自宅"
+                # 3. 区間の記入
+                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川→東京テレポート`r`n→品川→仙川"
+                # 4. 交通機関の記入
+                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nレインボーバス"
+                # 5. 金額の記入
+                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681+220+376"
+                # 6. 3行以上の欄がある場合は行の高さを変更する
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
+            }
+            # どこにも該当しなかった場合
+            Default {
+                displaySharpMessage "Red" ([string]$month + "月" + $kinmuhyouSheet.cells.item($row,3).text + "日の勤務地が正しく認識できませんでした。") "動作終了後に確認してください"
+            }
         }
 
-        
-        # 2. 適用の記入
-
-
-        # 3. 区間の記入
-
-
-        # 4. 交通機関の記入
-
-
-        # 5. 金額の記入
-
-
-
+        # 縦列カウンターのカウントアップ
+        $rowCounter = $rowCounter + 3
+        if ($row -eq 44) {
+            koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '以下余白'
+        }
     }
 }
 
@@ -266,11 +288,37 @@ if ($koguchiSheet.shapes.count -eq $numberOfObject) {
     $haveNotStamp = $true
 }
 
-
-
-
 # 文字色の変更（全部黒に）
 $koguchiSheet.range("A1:BN90").font.colorindex = 1
+
+# ---------------- 終了処理 ------------------
+# 月が1桁 (ex 1月) の場合2桁 (ex 01) を用意する
+$fileMonth = "{0:D2}" -f $month
+# 新しい小口ファイル名
+$koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth +  "_.xlsx"
+# ファイル名をファイル名として使える形に編集
+$koguchiNameSpace = $koguchiName -replace "　",""　#-replace " ",""
+$invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
+$regex = "[{0}]" -f [RegEx]::Escape($invalidChars)
+$koguchiNewName = $koguchiNameSpace -replace $regex
+$koguchiNewPath = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath $koguchiNewName
+# Bookの保存
+$koguchiBook.save()
+# Bookを閉じる
+$kinmuhyouBook.close()
+$koguchiBook.close()
+# Excelの終了
+$excel.quit()
+# 使用していたプロセスの解放
+$excel = $null
+$kinmuhyouBook = $null
+$kinmuhyouSheet = $null
+$koguchiBook = $null
+$koguchiSheet = $null
+$koguchiCell = $null
+[GC]::Collect()
+# 作成した小口のファイル名変更
+Rename-Item -path $koguchi -NewName $koguchiNewPath
 
 # 印鑑がないかもしれない場合注意喚起
 if ($haveNotStamp) {
