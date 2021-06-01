@@ -48,7 +48,16 @@ function displaySharpMessage {
     Write-Host ('#' * ($maxLengths*2+6) + "`r`n") -ForegroundColor $Args[0]
 }
 
-# -------------------- 主処理 ----------------------------
+# 引数の空白を除きファイル名として使えない文字を消す関数
+# fileName : ファイル名
+function remove-invalidFileNameChars ($fileName) {
+    $fileNameRemovedSpace = $fileName -replace "　",""　-replace " ",""
+    $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
+    $regex = "[{0}]" -f [RegEx]::Escape($invalidChars)
+    return $fileNameRemovedSpace -replace $regex
+}
+
+# -------------------- 主処理 --------------------------
 
 #=====================================================================
 ########################## 注意書きを表示。問題ない場合にはEnterを押させる。
@@ -122,7 +131,7 @@ try {
 
 # Excelがメッセージダイアログを表示しないようにする
 $excel.DisplayAlerts = $false
-$excel.visible = $true
+$excel.visible = $false
 
 # 勤務表ブックを開く
 $kinmuhyouBook = $excel.workbooks.open($kinmuhyouFullPath)
@@ -183,7 +192,9 @@ for ($row = 14; $row -le 44; $row++) {
                 # 5. 金額の記入
                 $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681*2"
                 # 6. 3行以上の欄がある場合は行の高さを変更する
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 18
+                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 18
+                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 18
             }
             "^品川$"{
                 # 2. 適用の記入
@@ -205,7 +216,9 @@ for ($row = 14; $row -le 44; $row++) {
                 # 5. 金額の記入
                 $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376+220+681"
                 # 6. 3行以上の欄がある場合は行の高さを変更する
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 25
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 21
             }
             "^お台場/品川$"{
                 # 2. 適用の記入
@@ -217,7 +230,9 @@ for ($row = 14; $row -le 44; $row++) {
                 # 5. 金額の記入
                 $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681+220+376"
                 # 6. 3行以上の欄がある場合は行の高さを変更する
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 25
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 21
             }
             # どこにも該当しなかった場合
             Default {
@@ -292,19 +307,15 @@ if ($koguchiSheet.shapes.count -eq $numberOfObject) {
 # 文字色の変更（全部黒に）
 $koguchiSheet.range("A1:BN90").font.colorindex = 1
 
+
 # ---------------- 終了処理 ------------------
+
 # 月が1桁 (ex 1月) の場合2桁 (ex 01) を用意する
 $fileMonth = "{0:D2}" -f $month
-# ファイル名被ったとき用文字列(covering)とそれにつかうカウンター(coveringCount)
-$covering = ""
-$coveringCount = 0
 # 新しい小口ファイル名
-$koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth + $covering +  "_.xlsx"
+$koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth +  ".xlsx"
 # ファイル名をファイル名として使える形に編集
-$koguchiNameSpace = $koguchiName -replace "　",""　-replace " ",""
-$invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
-$regex = "[{0}]" -f [RegEx]::Escape($invalidChars)
-$koguchiNewName = $koguchiNameSpace -replace $regex
+$koguchiNewName = remove-invalidFileNameChars $koguchiName
 $koguchiNewPath = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath $koguchiNewName
 
 # Bookの保存
@@ -321,13 +332,29 @@ $koguchiSheet = $null
 $koguchiCell = $null
 [GC]::Collect()
 
-try{
-# 作成した小口のファイル名変更
-    Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
-} catch {
-    $covering = "_" +$coveringCount+1
-    Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
+# ファイル名被ったとき用カウンター(covering)
+$covering = 1
+# 小口ファイルパスのオリジナルを退避
+$koguchiOriginal = $koguchiNewPath
+# 何回作ってもファイル名が被らないように通番を振る
+if (Test-Path $koguchiNewPath){
+    $koguchiNewPath = $koguchiNewPath -replace ".xlsx","_$covering.xlsx"
 }
+# 「・・・_1.xlsx」を作っておく
+$koguchiCoverdPath = $koguchiOriginal -replace ".xlsx","_$covering.xlsx"
+for ($i = 1;; $i++) {
+    if (Test-Path $koguchiCoverdPath) {
+        $coveringCurrent = [int]($koguchiCoverdPath.Substring($koguchiCoverdPath.Length - 6,1))
+        $covering = $coveringCurrent + 1
+        $koguchiCoverdPath = $koguchiCoverdPath -replace "_$coveringCurrent.xlsx","_$covering.xlsx"
+    }else{
+        $koguchiNewPath = $koguchiCoverdPath
+        break
+    }
+} 
+
+# 小口ファイル名を変更
+Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
 
 # 印鑑がないかもしれない場合注意喚起
 if ($haveNotStamp) {
