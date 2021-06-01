@@ -226,9 +226,9 @@ for ($row = 14; $row -le 44; $row++) {
 
         # 縦列カウンターのカウントアップ
         $rowCounter = $rowCounter + 3
-        if ($row -eq 44) {
-            koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '以下余白'
-        }
+    }
+    if ($row -eq 44) {
+        $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = '以下余白'
     }
 }
 
