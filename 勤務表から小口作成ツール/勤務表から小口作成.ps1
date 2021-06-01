@@ -316,7 +316,7 @@ $fileMonth = "{0:D2}" -f $month
 $koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth +  ".xlsx"
 # ファイル名をファイル名として使える形に編集
 $koguchiNewName = remove-invalidFileNameChars $koguchiName
-$koguchiNewPath = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath $koguchiNewName
+$newKoguchiPath = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath $koguchiNewName
 
 # Bookの保存
 $koguchiBook.save()
@@ -333,28 +333,28 @@ $koguchiCell = $null
 [GC]::Collect()
 
 # ファイル名被ったとき用カウンター(covering)
-$covering = 1
-# 小口ファイルパスのオリジナルを退避
-$koguchiOriginal = $koguchiNewPath
+$numberOfFiles = 1
+# 名前変更前のファイルパスを退避
+$koguchiBeforeChangePath = $newKoguchiPath
 # 何回作ってもファイル名が被らないように通番を振る
-if (Test-Path $koguchiNewPath){
-    $koguchiNewPath = $koguchiNewPath -replace ".xlsx","_$covering.xlsx"
+if (Test-Path $newKoguchiPath){
+    $newKoguchiPath = $newKoguchiPath -replace ".xlsx","_$numberOfFiles.xlsx"
 }
 # 「・・・_1.xlsx」を作っておく
-$koguchiCoverdPath = $koguchiOriginal -replace ".xlsx","_$covering.xlsx"
+$koguchiAfterChangePath = $koguchiBeforeChangePath -replace ".xlsx","_$numberOfFiles.xlsx"
 for ($i = 1;; $i++) {
-    if (Test-Path $koguchiCoverdPath) {
-        $coveringCurrent = [int]($koguchiCoverdPath.Substring($koguchiCoverdPath.Length - 6,1))
-        $covering = $coveringCurrent + 1
-        $koguchiCoverdPath = $koguchiCoverdPath -replace "_$coveringCurrent.xlsx","_$covering.xlsx"
+    if (Test-Path $koguchiAfterChangePath) {
+        $currentNumber = [int]($koguchiAfterChangePath.Substring($koguchiAfterChangePath.Length - 6,1))
+        $numberOfFiles = $currentNumber + 1
+        $koguchiAfterChangePath = $koguchiAfterChangePath -replace "_$currentNumber.xlsx","_$numberOfFiles.xlsx"
     }else{
-        $koguchiNewPath = $koguchiCoverdPath
+        $newKoguchiPath = $koguchiAfterChangePath
         break
     }
 } 
 
 # 小口ファイル名を変更
-Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
+Rename-Item -path $koguchi -NewName $newKoguchiPath -ErrorAction:Stop
 
 # 印鑑がないかもしれない場合注意喚起
 if ($haveNotStamp) {
