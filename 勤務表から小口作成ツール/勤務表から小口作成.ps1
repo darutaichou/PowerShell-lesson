@@ -12,8 +12,9 @@
 
 # 勤務表と小口を保存せずに閉じて、Excelを中断する関数
 function endExcel {
-    # Excelの終了
-    $excel.quit()
+    # Bookを閉じる
+    $kinmuhyouBook.close()
+    $koguchiBook.close()
     # 使用していたプロセスの解放
     $excel = $null
     $kinmuhyouBook = $null
@@ -200,11 +201,11 @@ for ($row = 14; $row -le 44; $row++) {
                 # 3. 区間の記入
                 $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川→品川`r`n→東京テレポート→仙川"
                 # 4. 交通機関の記入
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nレインボーバス"
+                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nレインボーバス`r`nりんかい線"
                 # 5. 金額の記入
                 $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376+220+681"
                 # 6. 3行以上の欄がある場合は行の高さを変更する
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 25
             }
             "^お台場/品川$"{
                 # 2. 適用の記入
@@ -212,11 +213,11 @@ for ($row = 14; $row -le 44; $row++) {
                 # 3. 区間の記入
                 $koguchiSheet.cells.item($rowCounter,$kukan).formula = "仙川→東京テレポート`r`n→品川→仙川"
                 # 4. 交通機関の記入
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nレインボーバス"
+                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "京王線`r`nJR山手線`r`nりんかい線`r`nレインボーバス"
                 # 5. 金額の記入
                 $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681+220+376"
                 # 6. 3行以上の欄がある場合は行の高さを変更する
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 20
+                $koguchiSheet.cells.item($rowCounter,1).rowheight = 25
             }
             # どこにも該当しなかった場合
             Default {
@@ -294,21 +295,23 @@ $koguchiSheet.range("A1:BN90").font.colorindex = 1
 # ---------------- 終了処理 ------------------
 # 月が1桁 (ex 1月) の場合2桁 (ex 01) を用意する
 $fileMonth = "{0:D2}" -f $month
+# ファイル名被ったとき用文字列(covering)とそれにつかうカウンター(coveringCount)
+$covering = ""
+$coveringCount = 0
 # 新しい小口ファイル名
-$koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth +  "_.xlsx"
+$koguchiName = $kinmuhyou.name.Substring(0,3) + "_小口交通費・出張旅費精算明細書_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth + $covering +  "_.xlsx"
 # ファイル名をファイル名として使える形に編集
-$koguchiNameSpace = $koguchiName -replace "　",""　#-replace " ",""
+$koguchiNameSpace = $koguchiName -replace "　",""　-replace " ",""
 $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
 $regex = "[{0}]" -f [RegEx]::Escape($invalidChars)
 $koguchiNewName = $koguchiNameSpace -replace $regex
 $koguchiNewPath = Join-Path $PWD "作成した小口明細書" | Join-Path -ChildPath $koguchiNewName
+
 # Bookの保存
 $koguchiBook.save()
 # Bookを閉じる
 $kinmuhyouBook.close()
 $koguchiBook.close()
-# Excelの終了
-$excel.quit()
 # 使用していたプロセスの解放
 $excel = $null
 $kinmuhyouBook = $null
@@ -317,8 +320,14 @@ $koguchiBook = $null
 $koguchiSheet = $null
 $koguchiCell = $null
 [GC]::Collect()
+
+try{
 # 作成した小口のファイル名変更
-Rename-Item -path $koguchi -NewName $koguchiNewPath
+    Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
+} catch {
+    $covering = "_" +$coveringCount+1
+    Rename-Item -path $koguchi -NewName $koguchiNewPath -ErrorAction:Stop
+}
 
 # 印鑑がないかもしれない場合注意喚起
 if ($haveNotStamp) {
