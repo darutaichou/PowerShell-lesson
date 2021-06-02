@@ -248,6 +248,31 @@ for ($row = 14; $row -le 44; $row++) {
 
         # 縦列カウンターのカウントアップ
         $rowCounter = $rowCounter + 3
+    } elseif ($workPlace -ne '在宅' -and $kinmuhyouSheet.cells.item($row, 6).text -ne "") {
+        
+        # 1. 月日の記入
+        $koguchiSheet.cells.item($rowCounter, 2) = $month
+        $koguchiSheet.cells.item($rowCounter, 4) = $kinmuhyouSheet.cells.item($row, 3).text
+        
+        switch ($kinmuhyouSheet.cells.item(7,7).text) {
+            # 品川勤務の場合
+            "アレア品川11F"{
+                # 2. 適用の記入
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "自宅←→品川"
+                # 3. 区間の記入
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "仙川←→品川"
+                # 4. 交通機関の記入
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "京王線`r`nJR山手線"
+                # 5. 金額の記入
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=376*2"
+            }
+            # どこにも該当しなかった場合
+            Default {
+                displaySharpMessage "Red" ([string]$month + "月" + $kinmuhyouSheet.cells.item($row, 3).text + "の備考が空です") "勤務表の作業場所からも勤務地が正しく認識できませんでした。" "動作終了後に確認してください"
+            }
+        }
+        # 縦列カウンターのカウントアップ
+        $rowCounter = $rowCounter + 3
     }
     if ($row -eq 44) {
         $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = '以下余白'
