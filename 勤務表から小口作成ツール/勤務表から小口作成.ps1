@@ -34,24 +34,24 @@ function endExcel {
 function displaySharpMessage {
     # •Ï”‚Ì‰Šú‰»
     $maxLengths = 0
-    for($i=1;$i -lt $Args.length;$i++){
+    for ($i = 1; $i -lt $Args.length; $i++) {
         # ƒƒbƒZ[ƒW‚Ì’†‚Åˆê”Ô’·‚¢•¶š”‚ğæ“¾‚·‚é
-        if( $maxLengths -lt $Args[$i].length){
+        if ( $maxLengths -lt $Args[$i].length) {
             $maxLengths = $Args[$i].length
         }
     }
     # ƒƒbƒZ[ƒW‚Ì•\¦
-    Write-Host ("`r`n" + '#' * ($maxLengths*2+6) + "`r`n") -ForegroundColor $Args[0]
-    for($i=1;$i -lt $Args.length;$i++){
+    Write-Host ("`r`n" + '#' * ($maxLengths * 2 + 6) + "`r`n") -ForegroundColor $Args[0]
+    for ($i = 1; $i -lt $Args.length; $i++) {
         Write-Host ('@@' + $Args[$i] + "@@`r`n") -ForegroundColor $Args[0]
     }
-    Write-Host ('#' * ($maxLengths*2+6) + "`r`n") -ForegroundColor $Args[0]
+    Write-Host ('#' * ($maxLengths * 2 + 6) + "`r`n") -ForegroundColor $Args[0]
 }
 
 # ˆø”‚Ì‹ó”’‚ğœ‚«ƒtƒ@ƒCƒ‹–¼‚Æ‚µ‚Äg‚¦‚È‚¢•¶š‚ğÁ‚·ŠÖ”
 # fileName : ƒtƒ@ƒCƒ‹–¼
 function remove-invalidFileNameChars ($fileName) {
-    $fileNameRemovedSpace = $fileName -replace "@",""@-replace " ",""
+    $fileNameRemovedSpace = $fileName -replace "@", ""@-replace " ", ""
     $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
     $regex = "[{0}]" -f [RegEx]::Escape($invalidChars)
     return $fileNameRemovedSpace -replace $regex
@@ -69,18 +69,20 @@ $today = (Get-Date).Day
 
 # Œ»İ“ú‚©‚çì¬‚·‚é‚×‚«‹Î–±•\‚ÌŒŸ‚ğ”»’è
 if ($today -le 24) {
-    $month = $thisMonth -1
-} else {
+    $month = $thisMonth - 1
+}
+else {
     $month = $thisMonth
 }
 
 # ¬Œûƒeƒ“ƒvƒŒ‚ğæ“¾
-$koguchiTemplate = Get-ChildItem -Recurse -File |? Name -Match "¬ŒûŒğ’Ê”ïEo’£—·”ï¸Z–¾×‘_ƒeƒ“ƒvƒŒ.xlsx"
+$koguchiTemplate = Get-ChildItem -Recurse -File | ? Name -Match "¬ŒûŒğ’Ê”ïEo’£—·”ï¸Z–¾×‘_ƒeƒ“ƒvƒŒ.xlsx"
 # ŠY“–¬Œûƒtƒ@ƒCƒ‹‚ÌŒÂ”Šm”F
 if ($koguchiTemplate.Count -lt 1) {
     Write-Host "`r`nŠY“–‚·‚é¬Œûƒtƒ@ƒCƒ‹‚ª‘¶İ‚µ‚Ü‚¹‚ñ`r`n`r`nƒ_ƒEƒ“ƒ[ƒh‚µ’¼‚µ‚Ä‚­‚¾‚³‚¢`r`n" -ForegroundColor Red
     exit
-} elseif ($koguchiTemplate.Count -gt 1) {
+}
+elseif ($koguchiTemplate.Count -gt 1) {
     Write-Host "`r`nŠY“–‚·‚é¬Œûƒtƒ@ƒCƒ‹‚ª‘½‚·‚¬‚Ü‚·`r`n`r`nƒ_ƒEƒ“ƒ[ƒh‚µ’¼‚µ‚Ä‚­‚¾‚³‚¢`r`n" -ForegroundColor Red
     exit
 }
@@ -90,32 +92,35 @@ $koguchi = Join-Path $PWD "ì¬‚µ‚½¬Œû–¾×‘" | Join-Path -ChildPath "¬ŒûŒğ’Ê”
 Copy-Item -path $koguchiTemplate.FullName -Destination $koguchi
 
 # ‹Î–±•\ƒtƒ@ƒCƒ‹‚ğæ“¾
-$kinmuhyou = Get-ChildItem -Recurse -File |? Name -Match "[0-9]{3}_‹Î–±•\_($month)Œ_.+"
+$kinmuhyou = Get-ChildItem -Recurse -File | ? Name -Match "[0-9]{3}_‹Î–±•\_($month)Œ_.+"
 
 # ŠY“–‹Î–±•\ƒtƒ@ƒCƒ‹‚ÌŒÂ”Šm”F
 if ($kinmuhyou.Count -lt 1) {
     Write-Host "`r`nŠY“–‚·‚é‹Î–±•\ƒtƒ@ƒCƒ‹‚ª‘¶İ‚µ‚Ü‚¹‚ñ`r`n" -ForegroundColor Red
     exit
-} elseif ($kinmuhyou.Count -gt 1) {
+}
+elseif ($kinmuhyou.Count -gt 1) {
     Write-Host "`r`nŠY“–‚·‚é‹Î–±•\ƒtƒ@ƒCƒ‹‚ª‘½‚·‚¬‚Ü‚·`r`n" -ForegroundColor Red
     exit
 }
 
 # ˆ—‚ğn‚ß‚é‘O‚ÉAƒtƒ@ƒCƒ‹‚Ì‘¶İƒ`ƒFƒbƒN‚Æƒtƒ@ƒCƒ‹–¼‚Ìƒ`ƒFƒbƒN‚ğs‚¤
-if ( $kinmuhyou.Name  -match "[0-9]{3}_‹Î–±•\_([1-9]|1[12])Œ_.+\.xlsx" ) {
+if ( $kinmuhyou.Name -match "[0-9]{3}_‹Î–±•\_([1-9]|1[12])Œ_.+\.xlsx" ) {
     Start-Sleep -milliSeconds 300
 
     try {
-    # ‹Î–±•\ƒtƒ@ƒCƒ‹‚Ìƒtƒ‹ƒpƒXæ“¾
-    $kinmuhyouFullPath = $kinmuhyou.FullName 
-    } catch [Exception] {
+        # ‹Î–±•\ƒtƒ@ƒCƒ‹‚Ìƒtƒ‹ƒpƒXæ“¾
+        $kinmuhyouFullPath = $kinmuhyou.FullName 
+    }
+    catch [Exception] {
         # ‹Î–±•\‚ª‘¶İ‚µ‚Ä‚¢‚é‚©ƒ`ƒFƒbƒN
         Write-Host ($month + "Œ‚Ì‹Î–±•\ƒtƒ@ƒCƒ‹‚ª‘¶İ‚µ‚Ü‚¹‚ñB`r`nƒ_ƒEƒ“ƒ[ƒh‚µ‚Ä‚­‚¾‚³‚¢`r`n") -ForegroundColor Red
         exit
     }
 
     displaySharpMessage "White" ([string]$month + " Œ‚Ì¬ŒûŒğ’Ê”ï¿‹‘‚ğì¬‚µ‚Ü‚·B") "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢B"
-}else {
+}
+else {
     # ‹Î–±•\ƒtƒ@ƒCƒ‹‚ÌƒtƒH[ƒ}ƒbƒg‚ªˆá‚¤ê‡‚ÍC³‚³‚¹‚é
     Write-Host " ######### <Ğˆõ”Ô†>_‹Î–±•\_mŒ_<–¼>.xlsx ‚ÌŒ`®‚Éƒtƒ@ƒCƒ‹–¼‚ğC³‚µ‚Ä‚­‚¾‚³‚¢ #########`r`n" -ForegroundColor Red
     exit
@@ -125,7 +130,8 @@ if ( $kinmuhyou.Name  -match "[0-9]{3}_‹Î–±•\_([1-9]|1[12])Œ_.+\.xlsx" ) {
 try {
     # ‹N“®’†‚ÌExcelƒvƒƒZƒX‚ğæ“¾
     $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject("Excel.Application")
-} catch {
+}
+catch {
     $excel = New-Object -ComObject "Excel.Application" 
 }
 
@@ -135,7 +141,7 @@ $excel.visible = $false
 
 # ‹Î–±•\ƒuƒbƒN‚ğŠJ‚­
 $kinmuhyouBook = $excel.workbooks.open($kinmuhyouFullPath)
-$kinmuhyouSheet = $kinmuhyouBook.sheets( "$month"+'Œ')
+$kinmuhyouSheet = $kinmuhyouBook.sheets( "$month" + 'Œ')
 
 # ¬ŒûƒuƒbƒN‚ğŠJ‚­
 $koguchiBook = $excel.workbooks.open($koguchi)
@@ -152,13 +158,13 @@ $rowCounter = 11
 # ”õl‚É‘‚©‚ê‚Ä‚¢‚é‹Î–±’n‚ğQl‚É¬Œû‚É‹L“ü
 for ($row = 14; $row -le 44; $row++) {
     # ”õl—“‚Ì•¶š—ñ
-    $workPlace = $kinmuhyouSheet.cells.item($row,27).text
+    $workPlace = $kinmuhyouSheet.cells.item($row, 27).text
 
     # İ‘î‚©‹x‚İ‚ÌˆÈŠO
     if ($workPlace -ne "" -and $workPlace -ne 'İ‘î') {
         # 1. Œ“ú‚Ì‹L“ü
-        $koguchiSheet.cells.item($rowCounter,2) = $month
-        $koguchiSheet.cells.item($rowCounter,4) = $kinmuhyouSheet.cells.item($row,3).text
+        $koguchiSheet.cells.item($rowCounter, 2) = $month
+        $koguchiSheet.cells.item($rowCounter, 4) = $kinmuhyouSheet.cells.item($row, 3).text
 
         # ------------- •Ï”’è‹` ---------------
         # “K—pƒZƒ‹(‰¡)
@@ -173,70 +179,70 @@ for ($row = 14; $row -le 44; $row++) {
 
         switch -regex ($workPlace) {
             "^“c’¬$" {
-                 # 2. “K—p‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "©‘î©¨“c’¬"
-                # 3. ‹æŠÔ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "åì©¨“c’¬"
-                # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "‹‰¤ü`r`nJRRèü"
-                # 5. ‹àŠz‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376*2"
-            }
-            "^‚¨‘äê$"{
                 # 2. “K—p‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "©‘î©¨‚¨‘äê"
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "©‘î©¨“c’¬"
                 # 3. ‹æŠÔ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "åì©¨“Œ‹ƒeƒŒƒ|[ƒg"
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "åì©¨“c’¬"
                 # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "‹‰¤ü`r`nJRé‹ü`r`n‚è‚ñ‚©‚¢ü"
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "‹‰¤ü`r`nJRRèü"
                 # 5. ‹àŠz‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681*2"
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=376*2"
+            }
+            "^‚¨‘äê$" {
+                # 2. “K—p‚Ì‹L“ü
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "©‘î©¨‚¨‘äê"
+                # 3. ‹æŠÔ‚Ì‹L“ü
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "åì©¨“Œ‹ƒeƒŒƒ|[ƒg"
+                # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "‹‰¤ü`r`nJRé‹ü`r`n‚è‚ñ‚©‚¢ü"
+                # 5. ‹àŠz‚Ì‹L“ü
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=681*2"
                 # 6. 3sˆÈã‚Ì—“‚ª‚ ‚éê‡‚Ís‚Ì‚‚³‚ğ•ÏX‚·‚é
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 18
-                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 18
-                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 18
+                $koguchiSheet.cells.item($rowCounter, 1).rowheight = 18
+                $koguchiSheet.cells.item($rowCounter + 1, 1).rowheight = 18
+                $koguchiSheet.cells.item($rowCounter + 2, 1).rowheight = 18
             }
-            "^•iì$"{
+            "^•iì$" {
                 # 2. “K—p‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "©‘î©¨•iì"
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "©‘î©¨•iì"
                 # 3. ‹æŠÔ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "åì©¨•iì"
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "åì©¨•iì"
                 # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "‹‰¤ü`r`nJRRèü"
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "‹‰¤ü`r`nJRRèü"
                 # 5. ‹àŠz‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376*2"
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=376*2"
             }
-            "^•iì/‚¨‘äê$"{
+            "^•iì/‚¨‘äê$" {
                 # 2. “K—p‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "©‘î¨•iì¨‚¨‘äê¨©‘î"
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "©‘î¨•iì¨‚¨‘äê¨©‘î"
                 # 3. ‹æŠÔ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "åì¨•iì`r`n¨“Œ‹ƒeƒŒƒ|[ƒg¨åì"
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "åì¨•iì`r`n¨“Œ‹ƒeƒŒƒ|[ƒg¨åì"
                 # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "‹‰¤ü`r`nJRRèü`r`nƒŒƒCƒ“ƒ{[ƒoƒX`r`n‚è‚ñ‚©‚¢ü"
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "‹‰¤ü`r`nJRRèü`r`nƒŒƒCƒ“ƒ{[ƒoƒX`r`n‚è‚ñ‚©‚¢ü"
                 # 5. ‹àŠz‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=376+220+681"
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=376+220+681"
                 # 6. 3sˆÈã‚Ì—“‚ª‚ ‚éê‡‚Ís‚Ì‚‚³‚ğ•ÏX‚·‚é
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 21
-                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 21
-                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter, 1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter + 1, 1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter + 2, 1).rowheight = 21
             }
-            "^‚¨‘äê/•iì$"{
+            "^‚¨‘äê/•iì$" {
                 # 2. “K—p‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = "©‘î¨‚¨‘äê¨•iì¨©‘î"
+                $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "©‘î¨‚¨‘äê¨•iì¨©‘î"
                 # 3. ‹æŠÔ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kukan).formula = "åì¨“Œ‹ƒeƒŒƒ|[ƒg`r`n¨•iì¨åì"
+                $koguchiSheet.cells.item($rowCounter, $kukan).formula = "åì¨“Œ‹ƒeƒŒƒ|[ƒg`r`n¨•iì¨åì"
                 # 4. Œğ’Ê‹@ŠÖ‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$koutsukikan).formula = "‹‰¤ü`r`nJRRèü`r`n‚è‚ñ‚©‚¢ü`r`nƒŒƒCƒ“ƒ{[ƒoƒX"
+                $koguchiSheet.cells.item($rowCounter, $koutsukikan).formula = "‹‰¤ü`r`nJRRèü`r`n‚è‚ñ‚©‚¢ü`r`nƒŒƒCƒ“ƒ{[ƒoƒX"
                 # 5. ‹àŠz‚Ì‹L“ü
-                $koguchiSheet.cells.item($rowCounter,$kingaku).formula = "=681+220+376"
+                $koguchiSheet.cells.item($rowCounter, $kingaku).formula = "=681+220+376"
                 # 6. 3sˆÈã‚Ì—“‚ª‚ ‚éê‡‚Ís‚Ì‚‚³‚ğ•ÏX‚·‚é
-                $koguchiSheet.cells.item($rowCounter,1).rowheight = 21
-                $koguchiSheet.cells.item($rowCounter+1,1).rowheight = 21
-                $koguchiSheet.cells.item($rowCounter+2,1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter, 1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter + 1, 1).rowheight = 21
+                $koguchiSheet.cells.item($rowCounter + 2, 1).rowheight = 21
             }
             # ‚Ç‚±‚É‚àŠY“–‚µ‚È‚©‚Á‚½ê‡
             Default {
-                displaySharpMessage "Red" ([string]$month + "Œ" + $kinmuhyouSheet.cells.item($row,3).text + "“ú‚Ì‹Î–±’n‚ª³‚µ‚­”F¯‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B") "“®ìI—¹Œã‚ÉŠm”F‚µ‚Ä‚­‚¾‚³‚¢"
+                displaySharpMessage "Red" ([string]$month + "Œ" + $kinmuhyouSheet.cells.item($row, 3).text + "“ú‚Ì‹Î–±’n‚ª³‚µ‚­”F¯‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B") "“®ìI—¹Œã‚ÉŠm”F‚µ‚Ä‚­‚¾‚³‚¢"
             }
         }
 
@@ -244,7 +250,7 @@ for ($row = 14; $row -le 44; $row++) {
         $rowCounter = $rowCounter + 3
     }
     if ($row -eq 44) {
-        $koguchiSheet.cells.item($rowCounter,$tekiyou).formula = 'ˆÈ‰º—]”’'
+        $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = 'ˆÈ‰º—]”’'
     }
 }
 
@@ -258,16 +264,16 @@ if ($month -eq 1 -and (Get-Date).day -le 24) {
 }
 
 # 1. ”NŒ“ú‚ÌƒRƒs[
-$koguchiSheet.cells.item(78,4) = $thisYear
-$koguchiSheet.cells.item(78,8) = $month
+$koguchiSheet.cells.item(78, 4) = $thisYear
+$koguchiSheet.cells.item(78, 8) = $month
 
 # Œ‚ÌÅI“ú‚ğ“ú•t—“‚Éİ’è
-$koguchiSheet.cells.item(78,11) = (Get-Date "$thisYear/$month/1").AddMonths(1).AddDays(-1).Day
+$koguchiSheet.cells.item(78, 11) = (Get-Date "$thisYear/$month/1").AddMonths(1).AddDays(-1).Day
 
 # 2. –¼‘O‚ÌƒRƒs[
-$koguchiSheet.cells.item(82,21) = $kinmuhyouSheet.cells.range("W7").text
+$koguchiSheet.cells.item(82, 21) = $kinmuhyouSheet.cells.range("W7").text
 # ‹Î–±•\‚Ì–¼‘O‚ª‹ó”’‚¾‚Á‚½ê‡ˆ—‚ğ’†’f‚·‚é
-if ($koguchiSheet.cells.item(82,21).text -eq "") {
+if ($koguchiSheet.cells.item(82, 21).text -eq "") {
     Write-Host ("`r`n" + $month + "Œ‚Ì‹Î–±•\‚É–¼‘O‚ª‹LÚ‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ`r`nˆ—‚ğ’†’f‚µ‚Ü‚·`r`n") -ForegroundColor Red
     endExcel
 }
@@ -276,9 +282,9 @@ if ($koguchiSheet.cells.item(82,21).text -eq "") {
 $affiliation = $kinmuhyouSheet.cells.range("W6").text
 # "•”" ‚ğíœ‚·‚é
 $affiliation -match "(?<affliationName>.+?)•”" | Out-Null
-$koguchiSheet.cells.item(80,6) = $Matches.affliationName
+$koguchiSheet.cells.item(80, 6) = $Matches.affliationName
 # ‹Î–±•\‚ÌŠ‘®‚ª‹ó”’‚¾‚Á‚½ê‡ˆ—‚ğ’†’f‚·‚é
-if ($koguchiSheet.cells.item(80,6).text -eq "") {
+if ($koguchiSheet.cells.item(80, 6).text -eq "") {
     Write-Host ("`r`n" + $month + "Œ‚Ì‹Î–±•\‚ÉŠ‘®‚ª‹LÚ‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ`r`nˆ—‚ğ’†’f‚µ‚Ü‚·`r`n") -ForegroundColor Red
     endExcel
 }
@@ -289,7 +295,7 @@ $haveNotStamp = $false
 # ‹Î–±•\‚ÌˆóŠÓ‚Ì‚ ‚éƒZƒ‹‚ğƒNƒŠƒbƒvƒ{[ƒh‚ÉƒRƒs[
 $kinmuhyouSheet.range("AA7").copy() | Out-Null
 # ¬ŒûƒV[ƒg‚ÉˆóŠÓ‚ğƒy[ƒXƒg
-$koguchiCell=$koguchiSheet.range("AD82")
+$koguchiCell = $koguchiSheet.range("AD82")
 $koguchiSheet.paste($koguchiCell)
 # ƒy[ƒXƒgæ‚ğ•ÒW
 $koguchiSheet.range("AD82").formula = ""
@@ -313,7 +319,7 @@ $koguchiSheet.range("A1:BN90").font.colorindex = 1
 # Œ‚ª1Œ… (ex 1Œ) ‚Ìê‡2Œ… (ex 01) ‚ğ—pˆÓ‚·‚é
 $fileMonth = "{0:D2}" -f $month
 # V‚µ‚¢¬Œûƒtƒ@ƒCƒ‹–¼
-$koguchiName = $kinmuhyou.name.Substring(0,3) + "_¬ŒûŒğ’Ê”ïEo’£—·”ï¸Z–¾×‘_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth +  ".xlsx"
+$koguchiName = $kinmuhyou.name.Substring(0, 3) + "_¬ŒûŒğ’Ê”ïEo’£—·”ï¸Z–¾×‘_" + $kinmuhyouSheet.cells.range("W7").text + "_" + $thisYear + $fileMonth + ".xlsx"
 # ƒtƒ@ƒCƒ‹–¼‚ğƒtƒ@ƒCƒ‹–¼‚Æ‚µ‚Äg‚¦‚éŒ`‚É•ÒW
 $koguchiNewName = remove-invalidFileNameChars $koguchiName
 $newKoguchiPath = Join-Path $PWD "ì¬‚µ‚½¬Œû–¾×‘" | Join-Path -ChildPath $koguchiNewName
@@ -337,21 +343,22 @@ $numberOfFiles = 1
 # –¼‘O•ÏX‘O‚Ìƒtƒ@ƒCƒ‹ƒpƒX‚ğ‘Ş”ğ
 $koguchiBeforeChangePath = $newKoguchiPath
 # ‰½‰ñì‚Á‚Ä‚àƒtƒ@ƒCƒ‹–¼‚ª”í‚ç‚È‚¢‚æ‚¤‚É’Ê”Ô‚ğU‚é
-if (Test-Path $newKoguchiPath){
-    $newKoguchiPath = $newKoguchiPath -replace ".xlsx","_$numberOfFiles.xlsx"
+if (Test-Path $newKoguchiPath) {
+    $newKoguchiPath = $newKoguchiPath -replace ".xlsx", "_$numberOfFiles.xlsx"
+    # uEEE_1.xlsxv‚ğì‚Á‚Ä‚¨‚­
+    $koguchiAfterChangePath = $koguchiBeforeChangePath -replace ".xlsx", "_$numberOfFiles.xlsx"
+    for ($i = 1; ; $i++) {
+        if (Test-Path $koguchiAfterChangePath) {
+            $currentNumber = [int]($koguchiAfterChangePath.Substring($koguchiAfterChangePath.Length - 6, 1))
+            $numberOfFiles = $currentNumber + 1
+            $koguchiAfterChangePath = $koguchiAfterChangePath -replace "_$currentNumber.xlsx", "_$numberOfFiles.xlsx"
+        }
+        else {
+            $newKoguchiPath = $koguchiAfterChangePath
+            break
+        }
+    } 
 }
-# uEEE_1.xlsxv‚ğì‚Á‚Ä‚¨‚­
-$koguchiAfterChangePath = $koguchiBeforeChangePath -replace ".xlsx","_$numberOfFiles.xlsx"
-for ($i = 1;; $i++) {
-    if (Test-Path $koguchiAfterChangePath) {
-        $currentNumber = [int]($koguchiAfterChangePath.Substring($koguchiAfterChangePath.Length - 6,1))
-        $numberOfFiles = $currentNumber + 1
-        $koguchiAfterChangePath = $koguchiAfterChangePath -replace "_$currentNumber.xlsx","_$numberOfFiles.xlsx"
-    }else{
-        $newKoguchiPath = $koguchiAfterChangePath
-        break
-    }
-} 
 
 # ¬Œûƒtƒ@ƒCƒ‹–¼‚ğ•ÏX
 Rename-Item -path $koguchi -NewName $newKoguchiPath -ErrorAction:Stop
