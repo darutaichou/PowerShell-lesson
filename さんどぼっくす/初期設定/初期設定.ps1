@@ -277,6 +277,9 @@ $koutsukikan3 = @()
 $koutsukikan4 = @()
 $koutsukikan5 = @()
 $koutsukikan6 = @()
+####################################
+$kingakuErrorMessages = @()
+####################################
 
 # フォームを増やしたかどうかのフラグ
 # 最初のループは増やしたことにする
@@ -484,10 +487,21 @@ function drawTextBox {
     drawLabel 10 $kingakuLabelLocate 500 ("４．【 金額 】 勤務地 `"" + $workPlaceArray[$i] + "`" の金額（往復代金）を入力してください") $forms[$i] | Out-Null
     drawLabel 20 ($kingakuLabelLocate + 20) 470 "ex.  750 （半角数字）" $forms[$i] | Out-Null
 
+    ####################################
+    # 金額が半角数字だった場合に表示されるエラーメッセージ
+    $kingakuErrorMessage = drawLabel 130 $kingakuTextBoxLocate 270 " " $forms[$i]
+    $kingakuErrorMessage.foreColor = "red"
+
+    # エラーメッセージを配列に追加
+    if ($isadded) {
+        $kingakuErrorMessages += $kingakuErrorMessage   
+    }
+    ####################################
+
     # テキストボックス関数呼び出し
     $outputKingaku= drawTextBox 20 $kingakuTextBoxLocate 100 20 $forms[$i]
 
-    # 適用テキストボックスを配列に追加
+    # 金額テキストボックスを配列に追加
     if ($isadded) {
         $outputkingakus += $outputKingaku   
     }
@@ -508,7 +522,7 @@ function drawTextBox {
 
         # 以下の変数をリセットする
         #
-        # nullOrEmptyCount : 交通機関テキストボックスの空の個数
+        # n ullOrEmptyCount : 交通機関テキストボックスの空の個数
         # koutsukikans : 複数の交通機関テキストボックスを一つにまとめるための変数
         # outputKoutsukikan : 編集したkoutsukikansを代入する
         # isEmpty : 空白エラーを起こすためのフラグ
@@ -519,7 +533,7 @@ function drawTextBox {
         $isEmpty = $false
 
         # テキストボックスの色を白に戻す
-        $outputTekiyous[$i].BackColor = "white"
+        $outputTekiyous[$i].BackColor= "white"
         $outputKukans[$i].BackColor = "white"
         $outputkingakus[$i].BackColor = "white"
         $outputkoutsukikans[$i][0].BackColor = "white"
@@ -556,6 +570,17 @@ function drawTextBox {
                     $isEmpty = $True
                 }    
             }
+
+            ####################################
+            # 金額が数字ではなかった時の処理
+            $checkKingaku = 0
+            if (![int]::TryParse($outputKingakus[$i].text, [ref]$checkKingaku)) {
+                $outputKingakus[$i].BackColor = "#ff99cc"
+                $kingakuErrorMessages[$i].text = "※半角数字で記入してください"
+                $isEmpty = $True
+            }
+            ####################################
+
             # 空白があった場合これ以降の処理をスキップする
             if ($isEmpty) {
                 # 交通機関の空白カウントを初期化
@@ -565,6 +590,7 @@ function drawTextBox {
                 $isEmpty = $True
                 continue EMPTY
             }
+            $kingakuErrorMessages[$i].text = "　"
             # エラーがない場合はループから抜ける
             break
         }
@@ -615,6 +641,8 @@ function drawTextBox {
         $inputContentsArray += @($workPlaceArray[$i] + "_1")
         $inputContentsArray += @($workPlaceArray[$i] + "_1")
         $inputContentsArray += @($workPlaceArray[$i] + "_1")
+
+        $isadded = $true
     }
     # 登録済み勤務地から選択する場合
     elseif ($inputContentsResult -eq "No") {
