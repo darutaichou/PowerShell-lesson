@@ -158,7 +158,7 @@ $rowCounter = 11
 # 備考に書かれている勤務地を参考に小口に記入
 for ($row = 14; $row -le 44; $row++) {
     # 備考欄の文字列
-    $workPlace = $kinmuhyouSheet.cells.item($row, 27).text
+    $workPlace = $kinmuhyouSheet.cells.item($row, 27).formula
 
     # 在宅か休みの時以外
     if ($workPlace -ne "" -and $workPlace -ne '在宅') {
@@ -248,15 +248,16 @@ for ($row = 14; $row -le 44; $row++) {
 
         # 縦列カウンターのカウントアップ
         $rowCounter = $rowCounter + 3
-    } elseif ($workPlace -ne '在宅' -and $kinmuhyouSheet.cells.item($row, 6).text -ne "") {
+    }
+    elseif ($workPlace -ne '在宅' -and $kinmuhyouSheet.cells.item($row, 6).text -ne "") {
         
         # 1. 月日の記入
         $koguchiSheet.cells.item($rowCounter, 2) = $month
         $koguchiSheet.cells.item($rowCounter, 4) = $kinmuhyouSheet.cells.item($row, 3).text
         
-        switch ($kinmuhyouSheet.cells.item(7,7).text) {
+        switch ($kinmuhyouSheet.cells.item(7, 7).text) {
             # 品川勤務の場合
-            "アレア品川11F"{
+            "アレア品川11F" {
                 # 2. 適用の記入
                 $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = "自宅←→品川"
                 # 3. 区間の記入
@@ -274,7 +275,7 @@ for ($row = 14; $row -le 44; $row++) {
         # 縦列カウンターのカウントアップ
         $rowCounter = $rowCounter + 3
     }
-    if ($row -eq 44) {
+    if ($row -eq 44 -and $rowCounter -lt 73) {
         $koguchiSheet.cells.item($rowCounter, $tekiyou).formula = '以下余白'
     }
 }
@@ -372,7 +373,7 @@ if (Test-Path $newKoguchiPath) {
     $newKoguchiPath = $newKoguchiPath -replace ".xlsx", "_$numberOfFiles.xlsx"
     # 「・・・_1.xlsx」を作っておく
     $koguchiAfterChangePath = $koguchiBeforeChangePath -replace ".xlsx", "_$numberOfFiles.xlsx"
-    for ($i = 1; ; $i++) {
+    for (; ; ) {
         if (Test-Path $koguchiAfterChangePath) {
             $currentNumber = [int]($koguchiAfterChangePath.Substring($koguchiAfterChangePath.Length - 6, 1))
             $numberOfFiles = $currentNumber + 1
